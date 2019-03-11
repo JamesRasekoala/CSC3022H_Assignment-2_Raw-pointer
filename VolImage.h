@@ -1,4 +1,14 @@
-//Volimage.h
+/**************************************************************************
+* 
+* 
+*   This h file is of Student Record. It contains a struct signature for
+*   Student Record and methods that help in providing access and 
+*   functionanity for the data base
+*	RSKJAM001
+*	James Rasekoala
+*
+* 
+* ***************************************************************************/
 
 #include <vector>
 #include <iostream>
@@ -7,16 +17,21 @@ using namespace std;
 
 #ifndef  _VOL
 #define  _VOL
+#include <vector>
+
 namespace RSKJAM001{
 
 	class VolImage
 	{
 		
+		
+		
 		private: 	// private members
 		
-		int width, height,numberImages; 							// width and height of image stack
-		std::vector<unsigned char**> slices; 		// data for each slice, in order
-		
+		int width;
+		int height;
+		int numberImages; 							// width and height of image stack
+		std::vector<unsigned char**> slicesVector; 		// data for each slice, in order
 		
 		public: 			// public members
 		
@@ -34,12 +49,13 @@ namespace RSKJAM001{
 		
 		// extract slice sliceId and write to output - define in .cpp
 		
-		void extract(int sliceId, std::string output_prefix);
-		
+		//void extract(int sliceId, std::string output_prefix);
+		void extract(int sliceId, std::string output_prefix);//int sliceId, std::string output_prefix);
 		// number of bytes uses to store image data bytes
 		//and pointers (ignore vector<> container, dims etc)
 		
 		int volImageSize(void); 			// define in .cpp
+		
 	};
 }
 

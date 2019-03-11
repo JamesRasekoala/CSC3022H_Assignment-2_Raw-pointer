@@ -8,16 +8,17 @@
 *
 * *****************************************************************/
 
-
+#include "VolImage.h"
 using namespace std;
 #include <iostream>
 int main (int argc, char* argv[]){
 	
+	RSKJAM001::VolImage volImage;
 	
 	
 	cout<<"Number of images: (int)"<<endl;
 	cout<<"Number of bytes required: (int)"<<endl;
-	
-	
+	volImage.readImages("MRI");
+	//volImage.extract();
 	
 	}
