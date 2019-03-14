@@ -45,28 +45,38 @@ bool RSKJAM001:: VolImage:: readImages(std::string baseName){
 			for(int picNum =0; picNum<= numberImages; picNum++){ 			//loop through all images
 				string pos;
 				pos=to_string(picNum);												// the number of the imagie in string format
-				ifstream rawfile;
+				//ifstream rawfile;
 				//cout<<"######################";
-				rawfile.open("brain_mri_raws/"+baseName+""+pos+".raw");
+				//rawfile.open("brain_mri_raws/"+baseName+""+pos+".raw",iso::binary);
+				ifstream rawfile("brain_mri_raws/"+baseName+""+pos+".raw",std::ios::binary);
 				cout<<"brain_mri_raws/"+baseName+""+pos+".raw"<<endl;
 				//rawfile.open();
+				streampos pix;
 				if(!rawfile){
 					cout<<" if statement"<<endl;
 					cout<<"Error opening Image"<<endl;
 					} else{
+						
+						
+						pix = rawfile.tellg();
 						// managed to open image
 						unsigned char** imageArray = new unsigned char* [height];
+						unsigned char* slice;
 						for(int ycord=0; ycord<height;ycord++){
-								imageArray[ycord] =  new unsigned char [width];
+							imageArray[ycord] =  new unsigned char [width];
 							
+							//width
 							
-							//streampos pix;
 							cout<<" inside "<< ycord<<" index"<<endl;
-							char* point = new char[rawfile.tellg()];
+							//char* point = new char[rawfile.tellg()];
+							slice = new unsigned char[width];
 							cout<<" point "<< ycord<<" index"<<endl;
-							rawfile.read(point,width);
+							rawfile.read((char*)slice,width);
+							
+							
+							//rawfile.read(point,sizeof(int) );
 							cout<<" rawfile "<< ycord<<" index"<<endl;
-							imageArray[ycord] = (unsigned char*)point;
+							imageArray[ycord] = slice;
 							cout<<" imageArray "<< imageArray[ycord] <<endl;
 							cout<<endl;
 							cout<<endl;
@@ -110,8 +120,8 @@ bool RSKJAM001:: VolImage:: readImages(std::string baseName){
 		
 			for(int r=0;r<height;r++){
 				for (int c=0;c<width;c++){
-				(unsigned char)(abs((float)volume[sliceI][r][c] - (float)volume[sliceJ][r][c])/2);
-				//fix volume thing
+				(unsigned char)(abs((float)slicesVector[sliceI][width][height] - (float)slicesVector[sliceJ][width][height])/2);
+				
 										 }
 									}
 		
@@ -119,7 +129,7 @@ bool RSKJAM001:: VolImage:: readImages(std::string baseName){
 		
 		
 	void RSKJAM001:: VolImage:: extract(int sliceId, std::string output_prefix){
-
+		
 		unsigned char** slice = slicesVector[sliceId];
 		std::ofstream file("output"+output_prefix+".dat");
 		file<<1<<" "<<1<<" "<<1;
@@ -133,12 +143,12 @@ bool RSKJAM001:: VolImage:: readImages(std::string baseName){
 		
 									}
 								}
+								
 		}
 		
 		
 	int RSKJAM001:: VolImage:: volImageSize(void){
-		
-		return 0;
+		return width*height*slicesVector.size();
 		}
 
 

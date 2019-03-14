@@ -19,6 +19,7 @@ int main (int argc, char* argv[]){
 	cout<<"Number of images: (int)"<<endl;
 	cout<<"Number of bytes required: (int)"<<endl;
 	volImage.readImages("MRI");
+	//volimg.extractRow(imgi, outfile);
 	//volImage.extract();
 	
 	}
