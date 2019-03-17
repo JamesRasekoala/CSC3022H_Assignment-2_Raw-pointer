@@ -56,6 +56,11 @@ namespace RSKJAM001{
 		
 		int volImageSize(void); 			// define in .cpp
 		
+		//extract row
+		void crossSectional(int height);
+		
+		//int numOfImages(void);
+		
 	};
 }
 

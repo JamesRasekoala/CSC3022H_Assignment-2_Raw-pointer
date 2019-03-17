@@ -49,7 +49,7 @@ bool RSKJAM001:: VolImage:: readImages(std::string baseName){
 				//cout<<"######################";
 				//rawfile.open("brain_mri_raws/"+baseName+""+pos+".raw",iso::binary);
 				ifstream rawfile("brain_mri_raws/"+baseName+""+pos+".raw",std::ios::binary);
-				cout<<"brain_mri_raws/"+baseName+""+pos+".raw"<<endl;
+	//			cout<<"brain_mri_raws/"+baseName+""+pos+".raw"<<endl;
 				//rawfile.open();
 				streampos pix;
 				if(!rawfile){
@@ -67,21 +67,21 @@ bool RSKJAM001:: VolImage:: readImages(std::string baseName){
 							
 							//width
 							
-							cout<<" inside "<< ycord<<" index"<<endl;
+	//						cout<<" inside "<< ycord<<" index"<<endl;
 							//char* point = new char[rawfile.tellg()];
 							slice = new unsigned char[width];
-							cout<<" point "<< ycord<<" index"<<endl;
+	//						cout<<" point "<< ycord<<" index"<<endl;
 							rawfile.read((char*)slice,width);
 							
 							
 							//rawfile.read(point,sizeof(int) );
-							cout<<" rawfile "<< ycord<<" index"<<endl;
+	//						cout<<" rawfile "<< ycord<<" index"<<endl;
 							imageArray[ycord] = slice;
-							cout<<" imageArray "<< imageArray[ycord] <<endl;
-							cout<<endl;
-							cout<<endl;
+	//						cout<<" imageArray "<< imageArray[ycord] <<endl;
+	//						cout<<endl;
+	//						cout<<endl;
 					}
-					cout<<" End of for loop"<<endl;
+	//				cout<<" End of for loop"<<endl;
 					slicesVector.push_back(imageArray);
 					rawfile.close();
 					}
@@ -117,11 +117,12 @@ bool RSKJAM001:: VolImage:: readImages(std::string baseName){
 
 
 	void RSKJAM001:: VolImage:: diffmap(int sliceI, int sliceJ, std::string output_prefix){
-		
+			std::ofstream diffmapDatafile("-----------"+output_prefix+".dat",std::ios::binary);
+			
 			for(int r=0;r<height;r++){
 				for (int c=0;c<width;c++){
-				(unsigned char)(abs((float)slicesVector[sliceI][width][height] - (float)slicesVector[sliceJ][width][height])/2);
-				
+				  /*(unsigned char)*/ char hold = abs(((float)slicesVector[sliceI][width][height] - (float)slicesVector[sliceJ][width][height])/2);
+					diffmapDatafile.write(&hold,1);
 										 }
 									}
 		
@@ -129,26 +130,81 @@ bool RSKJAM001:: VolImage:: readImages(std::string baseName){
 		
 		
 	void RSKJAM001:: VolImage:: extract(int sliceId, std::string output_prefix){
+		std::ofstream extractRawFile("-----------"+output_prefix+".raw",std::ios::binary);
 		
-		unsigned char** slice = slicesVector[sliceId];
-		std::ofstream file("output"+output_prefix+".dat");
-		file<<1<<" "<<1<<" "<<1;
-		 ofstream rawfile;
-		 rawfile.open("output.txt");
+		//unsigned char** slice = slicesVector[sliceId];
+		std::ofstream file("*******   "+output_prefix+".dat", ios::out);
+		file<<width<<" "<<height<<" "<<1;
+		ofstream rawfile;
+		rawfile.open(output_prefix+".data");
 
 		 rawfile.open("brain_mri_raws/output"+output_prefix+".dat");
+		 
+		 if(!extractRawFile){
+			 
+			 std::cout<<"Could't write file for extract "<<endl;
+			 }else{
 			for(int y; y<height;y++){
-				for(int x;x<width;x++ ){
+				char* bitLine = (char*) slicesVector[sliceId][y];
+				extractRawFile.write(bitLine,width);
+				//cout<<"*";
 			//rawfile<<"Please writr this text to a file.\n this text is written using C++\n";
-		
 									}
-								}
-								
+			}	
 		}
 		
 		
 	int RSKJAM001:: VolImage:: volImageSize(void){
-		return width*height*slicesVector.size();
+		//return width*height*slicesVector.size();
+		return (1 + height + width * height)* sizeof(unsigned char) * slicesVector.size(); // Size of uchars
 		}
+		
+		
+	void RSKJAM001:: VolImage:: crossSectional(int heightInput){
+			string output_prefix = "cross";
+			cout<<" extractRow  method "<<endl;
+			ofstream extractRawFile(output_prefix+".raw",std::ios::binary);
+		
+			//unsigned char** slice = slicesVector[sliceId];
+			std::ofstream file("cross"+output_prefix+".dat", ios::out);
+			file<<width<<" "<<height<<" "<<1;
+			ofstream rawfile;
+			rawfile.open(output_prefix+".data");
+			
+			for(int i=0; i<(int)slicesVector.size();i++){
+				char* bitLine = new char [width-1];
+				//cout<<"BitLine size";
+				//cout<<bitLine.size()<<endl;
+				
+				for(int w=0 ; w<width;w++){
+				char bit = (char) slicesVector[i][heightInput][w];
+				cout<<"count w :"<<w<<endl;
+				bitLine[i]= bit;
+			}
+			cout<<"extract size : "<<bitLine<<" Width :"<<width<<endl;
+			extractRawFile.write(bitLine,width);
+				}
+			
+			/*
+			
+			rawfile.open("brain_mri_raws/output"+output_prefix+".dat");
+		 
+			if(!extractRawFile){
+			 
+			 std::cout<<"Could't write file for extract "<<endl;
+			 }else{
+			for(int y; y<height;y++){
+				char* bit = (char*) slicesVector[sliceId][y];
+				extractRawFile.write(bit,width);
+				//cout<<"*";
+			//rawfile<<"Please writr this text to a file.\n this text is written using C++\n";
+									}
+			}	
+			*/
+		}
+		
+	//int RSKJAM001 :: VolImage :: numOfImages(void){
+		//return numberImages;
+		//}
 
 
