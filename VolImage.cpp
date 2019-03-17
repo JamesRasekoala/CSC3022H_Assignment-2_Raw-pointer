@@ -1,10 +1,11 @@
 /*****************************************************************
 *	
-* 	File defines student Record methods found in the studentRecord.h
-*   file. It provides a Vector called database used to store a 
-* 	temporary memory. This files uses two name
-* 	RSKJAM001
-*	James Rasekoala
+* 	File defines VolImage methods found in the VolImage.h
+*   file. It provides has Vector called slicesVector used to store slices.
+* 	
+* 	Student Number : RSKJAM001
+*	@author James Rasekoala
+* 	
 *
 * *****************************************************************/
 
@@ -13,92 +14,71 @@
 #include <vector>
 #include <fstream>
 #include <string>
-////////////
 #include <math.h>
 #include <sstream>
 using namespace std;
-
-//RSKJAM001::VolImage volimage;
 
 
 bool RSKJAM001:: VolImage:: readImages(std::string baseName){
 		vector<string> line;
 		string fileExtension=".raw";
 		string content;
-		ifstream file("brain_mri_raws/"+baseName+".data");
-		if(!file){
-			cout<<"Error opening file"<<endl;
-			}else{
+		ifstream file("brain_mri_raws/"+baseName+".data");		//variable to work for all images
 		
+		if(!file){
+			// if file can not be opened
+			cout<<"Error opening file"<<endl;
 			
-			while(std::getline(file, content, ' ')) {
-			line.push_back(content);  
-				}
-			file.close();
+		}else{
 			
+			while(std::getline(file, content, ' ')) { //reads and data file for parameters
+				line.push_back(content);  
+				
+			}
+				file.close(); 		//data file closed
+				
+			// assigning image parameter 	
 			istringstream ( line[0] ) >> width;
-		    istringstream ( line[1] ) >> height;
+			istringstream ( line[1] ) >> height;
 			istringstream ( line[2] ) >> numberImages;
 						
-			//cout<<"width : "<<width<<" height : "<<height<<" numberImages :"<<numberImages<<endl;
-			//cout<<"Test"<<
 			for(int picNum =0; picNum<= numberImages; picNum++){ 			//loop through all images
 				string pos;
-				pos=to_string(picNum);												// the number of the imagie in string format
-				//ifstream rawfile;
-				//cout<<"######################";
-				//rawfile.open("brain_mri_raws/"+baseName+""+pos+".raw",iso::binary);
-				ifstream rawfile("brain_mri_raws/"+baseName+""+pos+".raw",std::ios::binary);
-	//			cout<<"brain_mri_raws/"+baseName+""+pos+".raw"<<endl;
-				//rawfile.open();
+				pos=to_string(picNum);						// the number of the imagie in string format
+				ifstream rawfile("brain_mri_raws/"+baseName+""+pos+".raw",std::ios::binary);   //secifies file name and changes it accoding to loop for all images
 				streampos pix;
 				if(!rawfile){
-					cout<<" if statement"<<endl;
 					cout<<"Error opening Image"<<endl;
 					} else{
-						
-						
-						pix = rawfile.tellg();
-						// managed to open image
+
+						pix = rawfile.tellg();				
 						unsigned char** imageArray = new unsigned char* [height];
 						unsigned char* slice;
 						for(int ycord=0; ycord<height;ycord++){
 							imageArray[ycord] =  new unsigned char [width];
-							
-							//width
-							
-	//						cout<<" inside "<< ycord<<" index"<<endl;
-							//char* point = new char[rawfile.tellg()];
 							slice = new unsigned char[width];
-	//						cout<<" point "<< ycord<<" index"<<endl;
 							rawfile.read((char*)slice,width);
-							
-							
-							//rawfile.read(point,sizeof(int) );
-	//						cout<<" rawfile "<< ycord<<" index"<<endl;
 							imageArray[ycord] = slice;
-	//						cout<<" imageArray "<< imageArray[ycord] <<endl;
-	//						cout<<endl;
-	//						cout<<endl;
-					}
-	//				cout<<" End of for loop"<<endl;
-					slicesVector.push_back(imageArray);
-					rawfile.close();
+															}
+															
+						slicesVector.push_back(imageArray); 		// adds 2D image slice to vector
+						rawfile.close();		// closes file for looped image
 					}
 					
 				
+				//end of for loop
 				}
 			
-			
+		//end of else loop for opening
 		}
 		
 		return true;
-		
-		
+
 }
 
 
 		RSKJAM001:: VolImage::VolImage(){
+			// costructor creats a VolImage with default values as below
 			width = 0;
 			height = 0;
 			std:: vector<unsigned char **> slicesVector(0);
@@ -106,57 +86,70 @@ bool RSKJAM001:: VolImage:: readImages(std::string baseName){
 
 
 			RSKJAM001:: VolImage::~VolImage(){ 
+				// destructor method to free memory
 				for(std::size_t i =0; i< slicesVector.size();i++){
 					for(int j =0; j< height;j++){
-						delete[] slicesVector[i][j];
+						delete[] slicesVector[i][j]; // dealocates each row for using the heigt going down
 						 }
-					delete [] slicesVector[i];
+					delete [] slicesVector[i]; // dealocates the now empty slice
 				}
-				cout<< "Memory cleared "<<endl ;
+				
 			}
 
 
 	void RSKJAM001:: VolImage:: diffmap(int sliceI, int sliceJ, std::string output_prefix){
-			std::ofstream diffmapDatafile("-----------"+output_prefix+".dat",std::ios::binary);
+		// calculates the difference in volume for two different slices
+			std::ofstream diffmapDatafile(output_prefix+".raw",std::ios::binary); 	// writes binary file
 			
+			// loop through hight
 			for(int r=0;r<height;r++){
+				//loop through width
 				for (int c=0;c<width;c++){
-				  /*(unsigned char)*/ char hold = abs(((float)slicesVector[sliceI][width][height] - (float)slicesVector[sliceJ][width][height])/2);
+					//hold holds the difference in pixels
+				    char hold = abs(((float)slicesVector[sliceI][width][height] - (float)slicesVector[sliceJ][width][height])/2);
 					diffmapDatafile.write(&hold,1);
 										 }
 									}
-		
+			diffmapDatafile.close();  //close file
 		}
 		
 		
 	void RSKJAM001:: VolImage:: extract(int sliceId, std::string output_prefix){
-		std::ofstream extractRawFile("-----------"+output_prefix+".raw",std::ios::binary);
-		
-		//unsigned char** slice = slicesVector[sliceId];
-		std::ofstream file("*******   "+output_prefix+".dat", ios::out);
-		file<<width<<" "<<height<<" "<<1;
-		ofstream rawfile;
-		rawfile.open(output_prefix+".data");
-
-		 rawfile.open("brain_mri_raws/output"+output_prefix+".dat");
+			
+			std::ofstream extractRawFile(output_prefix+".raw",std::ios::binary);
+			std::ofstream file(output_prefix+".dat", ios::out);
+			file<<width<<" "<<height<<" "<<1;
+			ofstream rawfile;
+			rawfile.open(output_prefix+".data");
+			rawfile.open("brain_mri_raws/output"+output_prefix+".dat");
 		 
 		 if(!extractRawFile){
 			 
+			 // if file does not open
 			 std::cout<<"Could't write file for extract "<<endl;
-			 }else{
+		}else{
+			
+			//for loop to go through each row for height number of times
 			for(int y; y<height;y++){
+					//take the whole row of size width
 				char* bitLine = (char*) slicesVector[sliceId][y];
+				// write a raw file with a raw file and write the size of width
 				extractRawFile.write(bitLine,width);
-				//cout<<"*";
-			//rawfile<<"Please writr this text to a file.\n this text is written using C++\n";
-									}
-			}	
+			}
+			
+		}
+		
+	extractRawFile.close(); // closes writing file	
+	rawfile.close(); // closes reading file	
 		}
 		
 		
 	int RSKJAM001:: VolImage:: volImageSize(void){
-		//return width*height*slicesVector.size();
-		return (1 + height + width * height)* sizeof(unsigned char) * slicesVector.size(); // Size of uchars
+		int widthPtrSize =  sizeof(unsigned char) * slicesVector.size();		 //size of weight pointer
+		int hightPtr =  height* sizeof(unsigned char) * slicesVector.size();	 //size of 2D pointers used to hold raw
+		int	SliceSize =  width * height* sizeof(unsigned char) * slicesVector.size(); // calculate size of all slices
+		int totalSize = widthPtrSize + hightPtr + SliceSize;
+		return totalSize; // Size of uchars plus pinters
 		}
 		
 		
