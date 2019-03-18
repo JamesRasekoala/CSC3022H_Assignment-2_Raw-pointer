@@ -37,7 +37,10 @@ namespace RSKJAM001{
 		
 		// compute difference map and write out; define in .cpp
 		void diffmap(int sliceI, int sliceJ, std::string output_prefix);
-		
+	
+		// method to return number of images
+		int numOfImages(void);
+	
 		// extract slice sliceId and write to output - define in .cpp
 		//void extract(int sliceId, std::string output_prefix);
 		void extract(int sliceId, std::string output_prefix);//int sliceId, std::string output_prefix);
@@ -48,9 +51,10 @@ namespace RSKJAM001{
 		int volImageSize(void); 			// define in .cpp
 		
 		//extract row
-		void crossSectional(int height);
+		void crossSectional(int height , std::string output_prefix);
 		
-		//int numOfImages(void);
+		 
+		
 		
 	};
 }
